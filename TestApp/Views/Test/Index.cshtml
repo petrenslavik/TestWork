@@ -1,0 +1,85 @@
+﻿@model IEnumerable<TestApp.Data.Entities.Test>
+@{
+    ViewData["Title"] = "List of tests";
+}
+
+<div id="app">
+    <router-view></router-view>
+</div>
+
+<template id="test">
+    <div class="card-deck">
+        <div class="card" v-for="test in tests" :key="test.id">
+            <div class="card-body">
+                <h5 class="card-title">{{test.title}}</h5>
+                <p class="card-text">{{test.description}}</p>
+                <a href="/test/start" @@click.prevent="start(test)" class="card-link btn btn-primary">Start</a>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="test-view">
+    <div>
+        <div v-if="started? false:true" class="card text-center bg-light mb-3">
+            <h5 class="card-header">
+                {{title}}
+            </h5>
+            <div class="card-body">
+                <p>Description: {{description}}</p>
+                <p>
+                    <input type="checkbox" value="true" id="Agree" v-model="agreed" />
+                    <label class="form-check-label" for="Agree">I agree to start</label>
+                </p>
+                <button type="button" :disabled="agreed? false:true" @@click="start()" class="btn btn-primary">Proceed</button>
+            </div>
+        </div>
+        <div v-else-if="finished? false: true">
+            <question-view :data="currentQuestion" :index="index" :next-function="next"></question-view>
+        </div>
+        <results v-else :selected-answers="selectedAnswers" :questions="questions"></results>
+    </div>
+</template>
+
+<template id="question-view">
+    <div>
+        <div class="list-group-item question">
+            <div class="row">
+                <div class="col-12">{{index}}. {{data.text}} </div>
+            </div>
+            <div class="custom-control custom-radio mt-1 answer" v-for="answer in data.answers">
+                <input type="radio" :id="answer.id" class="custom-control-input" :name="index" :value="answer.id" v-model="selected">
+                <label class="custom-control-label" :for="answer.id">{{answer.text}}</label>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="button" class="btn btn-success" @@click="save()">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="results">
+    <div>
+        <h2 class="text-center">Result</h2>
+        <div class="list-group-item" v-for="(answer,index) in selectedAnswers">
+            <div>
+                <p><span class="question-number">{{index+1}}</span> {{questions[index].text}}</p>
+                <p>
+                    Your answer: {{answer.text}}
+                    <span v-if="answer.isRight" class="badge badge-pill badge-success">
+                        Correct
+                    </span>
+                    <span v-else class="badge badge-pill badge-danger">
+                        Wrong
+                    </span>
+                </p>
+            </div>
+        </div>
+        <p>
+            Total: {{totalPoints}}
+        </p>
+        <a href="/" class="btn btn-primary">Back</a>
+    </div>
+</template>
